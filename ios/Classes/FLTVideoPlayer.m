@@ -15,6 +15,7 @@
 //    CVPixelBufferRef pixelBufferNowRef;
     CVPixelBufferRef volatile _latestPixelBuffer;
     CVPixelBufferRef _lastBuffer;
+    Boolean loop;
 }
 
 - (instancetype)initWithCall:(FlutterMethodCall *)call frameUpdater:(FLTFrameUpdater *)frameUpdater registry:(NSObject<FlutterTextureRegistry> *)registry messenger:(NSObject<FlutterBinaryMessenger>*)messenger{
@@ -39,6 +40,8 @@
     playConfig.connectRetryInterval = 3;
     playConfig.timeout = 10 ;
     
+    playConfig.playerType = PLAYER_AVPLAYER;
+    
     
     
     id headers = argsMap[@"headers"];
@@ -50,17 +53,21 @@
     id cacheFolderPath = argsMap[@"cachePath"];
     if (cacheFolderPath!=nil&&cacheFolderPath!=NULL&&![@"" isEqualToString:cacheFolderPath]&&cacheFolderPath!=[NSNull null]) {
         playConfig.cacheFolderPath = cacheFolderPath;
-        playConfig.maxCacheItems = 2;
+        playConfig.maxCacheItems = 20;
     }else{
         // 设置缓存路径
-        //playConfig.cacheFolderPath =[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-        playConfig.maxCacheItems = 0;
+        playConfig.cacheFolderPath =[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        playConfig.maxCacheItems = 20;
     }
 
-    playConfig.progressInterval =  1;
+    playConfig.progressInterval =  0.5;
     playConfig.maxBufferSize=4;
     //[argsMap[@"progressInterval"] intValue] ;
     BOOL autoPlayArg = [argsMap[@"autoPlay"] boolValue];
+    Boolean isLoop = [argsMap[@"loop"] boolValue];
+    
+    loop = isLoop;
+    
     float startPosition=0;
     
     id startTime = argsMap[@"startTime"];
@@ -80,8 +87,8 @@
     [_txPlayer setVideoProcessDelegate:self];
     [_txPlayer setStartTime:startPosition];
     
-    BOOL loop =  [argsMap[@"loop"] boolValue];
-    [_txPlayer setLoop: loop];
+//    BOOL loop =  [argsMap[@"loop"] boolValue];
+//    [_txPlayer setLoop: loop];
   
     id  pathArg = argsMap[@"uri"];
     if(pathArg!=nil&&pathArg!=NULL&&![@"" isEqualToString:pathArg]&&pathArg!=[NSNull null]){
@@ -208,9 +215,18 @@
             
         }else if(EvtID==PLAY_EVT_PLAY_END){
             if(self->_eventSink!=nil){
-                self->_eventSink(@{
-                    @"event":@"playend",
-                });
+                if(self->loop) {
+                    self->_eventSink(@{
+                        @"event":@"singlePlayCompleted",
+                    });
+                    [self->_txPlayer seek:(float) 0];
+                    [self->_txPlayer resume];
+                }
+                else {
+                    self->_eventSink(@{
+                        @"event":@"playend",
+                    });
+                }
             }
             
         }else if(EvtID==PLAY_ERR_NET_DISCONNECT){
