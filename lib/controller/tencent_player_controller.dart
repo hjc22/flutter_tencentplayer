@@ -78,7 +78,11 @@ class TencentPlayerController extends ValueNotifier<TencentPlayerValue> {
         case 'loadingend':
           value = value.copyWith(isLoading: false);
           break;
+        case 'singlePlayCompleted':
+          if(playerConfig.onSinglePlayerCompleted != null) playerConfig.onSinglePlayerCompleted();
+          break;
         case 'playend':
+          if(playerConfig.onCompleted != null) playerConfig.onCompleted();
           value = value.copyWith(isPlaying: false, position: value.duration);
           break;
         case 'netStatus':

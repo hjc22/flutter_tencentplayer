@@ -1,8 +1,12 @@
+import 'package:flutter/material.dart' show VoidCallback;
+
 class PlayerConfig {
   final bool autoPlay;
   final bool loop;
   final Map<String, String> headers;
   final String cachePath;
+  final VoidCallback onSinglePlayerCompleted;
+  final VoidCallback onCompleted;
   final int progressInterval;
   // 单位:秒
   final int startTime;
@@ -13,6 +17,8 @@ class PlayerConfig {
       {this.autoPlay = true,
         this.loop = false,
         this.headers,
+        this.onSinglePlayerCompleted,
+        this.onCompleted,
         this.cachePath,
         this.progressInterval = 200,
         this.startTime,

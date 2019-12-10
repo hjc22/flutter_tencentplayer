@@ -40,7 +40,7 @@
     playConfig.connectRetryInterval = 3;
     playConfig.timeout = 10 ;
     
-    playConfig.playerType = PLAYER_AVPLAYER;
+    // playConfig.playerType = PLAYER_AVPLAYER;
     
     
     
@@ -166,18 +166,16 @@
         
         if(EvtID==PLAY_EVT_VOD_PLAY_PREPARED){
             int64_t duration = [player duration];
-                           NSString *durationStr = [NSString stringWithFormat: @"%ld", (long)duration];
-                           NSInteger  durationInt = [durationStr intValue];
+//                           NSString *durationStr = [NSString stringWithFormat: @"%ld", (long)duration];
+//                           NSInteger  durationInt = [durationStr intValue];
                            if(self->_eventSink!=nil){
                                self->_eventSink(@{
                                    @"event":@"initialized",
-                                   @"duration":@(durationInt),
+                                   @"duration":@(duration * 1000),
                                    @"width":@([player width]),
                                    @"height":@([player height])
                                });
-                           }
-                           
-            
+                           }    
         }else if(EvtID==PLAY_EVT_PLAY_PROGRESS){
             int64_t progress = [player currentPlaybackTime];
                            int64_t duration = [player duration];
